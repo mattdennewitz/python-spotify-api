@@ -161,6 +161,7 @@ class Album(Model):
     href = StringField()
     popularity = DecimalField()
     released = IntegerField()
+    availability = StringField()
 
     def __repr__(self):
         return '<Album: %s: %s>' % (
@@ -182,6 +183,7 @@ class Track(Model):
     track_number = IntegerField(object_key='track-number')
     available = BooleanField()
     disc_number = IntegerField(object_key='disc-number')
+    availability = StringField()
 
     def __repr__(self):
         return '<Track: %s: %s>' % (
