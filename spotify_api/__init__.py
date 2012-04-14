@@ -74,6 +74,12 @@ class ModelListField(ModelField):
         return values
 
 
+class TerritoryField(Field):
+
+    def to_python(self, value):
+        return value.split(' ') if value else []
+
+
 class ModelMetaclass(type):
 
     def __new__(cls, name, bases, attrs):
@@ -113,7 +119,28 @@ class Model(object):
 
         for field_name, field in cls._fields.items():
             field_key = field.object_key or field_name
-            value = obj.get(field_key)
+
+            bits = field_key.split('.')
+            root_attr = bits.pop(0)
+            value = obj.get(root_attr)
+
+            while bits:
+                bit = bits.pop(0)
+
+                try:
+                    bit = int(bit)
+                    value = value[bit]
+                except IndexError:
+                    value = None
+                    break
+                except ValueError:
+                    if isinstance(value, dict):
+                        value = value[bit]
+                    else:
+                        value = getattr(value, bit, None)
+                        if callable(value):
+                            value = value()
+
             if value is not None:
                 value = field.to_python(value)
             values[field_name] = value
@@ -136,6 +163,10 @@ class ExternalId(Model):
 
     def __repr__(self):
         return '<Id: %s / %s>' % (self.type, self.id)
+
+
+class Availability(Model):
+    territories = TerritoryField()
 
 
 class Artist(Model):
@@ -161,7 +192,7 @@ class Album(Model):
     href = StringField()
     popularity = DecimalField()
     released = IntegerField()
-    availability = StringField()
+    availability = ModelField(Availability)
 
     def __repr__(self):
         return '<Album: %s: %s>' % (
@@ -183,7 +214,9 @@ class Track(Model):
     track_number = IntegerField(object_key='track-number')
     available = BooleanField()
     disc_number = IntegerField(object_key='disc-number')
-    availability = StringField()
+
+    # mirror of album availability
+    availability = ModelField(Availability, object_key='album.availability')
 
     def __repr__(self):
         return '<Track: %s: %s>' % (
@@ -224,3 +257,10 @@ class SpotifyApi(object):
     artists = MetadataResource(resource=Artist)
     albums = MetadataResource(resource=Album)
     tracks = MetadataResource(resource=Track)
+
+
+if __name__ == '__main__':
+    api = SpotifyApi()
+
+    for track in api.tracks.search('split cranium'):
+        print track.availability.territories
