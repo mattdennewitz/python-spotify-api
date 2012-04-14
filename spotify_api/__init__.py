@@ -4,8 +4,9 @@ Spotify API wrapper
 
 import requests
 
-from base import *
-from fields import *
+from .base import *
+from .connection import *
+from .fields import *
 
 
 class ExternalId(Model):
@@ -76,31 +77,13 @@ class Track(Model):
 
 
 class MetadataResource(object):
-    METHODS = ('search', 'lookup')
 
-    def __init__(self, resource, api_version=1):
+    def __init__(self, resource):
+        self.__connection = ApiTransport(resource.resource_name)
         self.resource = resource
-        self.api_version = api_version
-
-    def __get_url(self, method):
-        return 'http://ws.spotify.com/%(method)s/%(version)s/%(resource)s.json' % {
-            'method': method,
-            'version': self.api_version,
-            'resource': self.resource.resource_name}
-
-    def __make_request(self, method, **kwargs):
-        response = requests.get(self.__get_url(method), params=kwargs)
-        if response.status_code != 200:
-            raise SpotifyException('<%s> Could not load %s: %s' % (
-                    response.status_code, response.url, response.text))
-        return response
 
     def search(self, query):
-        response = self.__make_request('search', q=query)
-        return self.resource.from_response(response.text)
-
-    def lookup(self, query, extra):
-        response = self.__make_request('lookup', q=query, extras=extra)
+        response = self.__connection.get('search', q=query)
         return self.resource.from_response(response.text)
 
 
@@ -108,10 +91,3 @@ class SpotifyApi(object):
     artists = MetadataResource(resource=Artist)
     albums = MetadataResource(resource=Album)
     tracks = MetadataResource(resource=Track)
-
-
-if __name__ == '__main__':
-    api = SpotifyApi()
-
-    for track in api.tracks.search('split cranium'):
-        print track.availability.territories
