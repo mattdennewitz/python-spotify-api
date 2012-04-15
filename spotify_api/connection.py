@@ -1,19 +1,17 @@
 import requests
 
+from .base import SpotifyException
+
 
 __all__ = ('ApiTransport', )
 
 
-from .base import SpotifyException
-
-
 class ApiTransport(object):
+    """Handles the request/response dirty work.
+    """
 
-    def __init__(self, resource_name=None, api_version=1):
-        self.resource_name = resource_name
-        self.api_version = api_version
-
-    def get(self, url, **kwargs):
+    @classmethod
+    def get(cls, url, **kwargs):
         response = requests.get(url, params=kwargs)
         if response.status_code != 200:
             raise SpotifyException('<%s> Could not load %s: %s' % (

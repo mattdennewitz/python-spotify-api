@@ -1,5 +1,5 @@
-from spotify_api.base import Model
-from spotify_api.fields import *
+from .base import Model
+from .fields import *
 
 
 __all__ = ('Artist', 'Album', 'Track')

@@ -4,7 +4,7 @@ Spotify API resource modeling
 
 import json
 
-from fields import Field
+from .fields import Field
 
 
 __all__ = ('SpotifyException', 'Model')

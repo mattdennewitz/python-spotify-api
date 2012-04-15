@@ -11,10 +11,8 @@ class SearchResource(Resource):
         self.resource = resource
         self.api_version = api_version
 
-        self.__connection = ApiTransport(self.resource.resource_name)
-
     def search(self, query):
-        response = self.__connection.get(self._get_url(), q=query)
+        response = ApiTransport.get(self._get_url(), q=query)
         results = self._extract_from_response(response.text)
 
         for obj in results:
