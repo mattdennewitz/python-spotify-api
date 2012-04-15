@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='python-spotify-metadata-api',
-      version='0.1.1',
+      version='0.2.0',
       description='Lightweight Spotify metadata search API wrapper',
       author='Matt Dennewitz',
       author_email='mattdennwitz@gmail.com',
