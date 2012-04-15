@@ -82,10 +82,19 @@ class Model(object):
         return cls(**values)
 
     @classmethod
-    def from_response(cls, data):
-        data = json.loads(data)
+    def from_response(cls, obj):
+        return cls.from_object(obj)
 
-        objects = data.get(cls.wrapper)
 
-        for obj in objects:
-            yield cls.from_object(obj)
+class Resource(object):
+
+    def _extract_from_response(self, response_body):
+        """Unserializes an API response and extracts an object or collection.
+        """
+
+        data = json.loads(response_body)
+        wrapper_key = self._get_wrapper_key(data)
+        return data.get(wrapper_key)
+
+    def _get_wrapper_key(self, data):
+        return data['info']['type']
