@@ -1,3 +1,7 @@
+*Note:* Spotify's upgraded their API. Updated bindings can be found here: https://github.com/plamere/spotipy.
+
+---
+
 ``python-spotify-api``
 ======================
 
